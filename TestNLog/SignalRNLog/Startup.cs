@@ -14,7 +14,8 @@ namespace SignalRNLog
         public void Configuration(IAppBuilder app)
         {
             GlobalHost.HubPipeline.AddModule(new SignalrErrorHandler());
-            app.MapSignalR();
+            Microsoft.AspNet.SignalR.StockTicker.Startup.ConfigureSignalR(app);
+            //app.MapSignalR();
         }
     }
 }
