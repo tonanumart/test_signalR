@@ -178,13 +178,13 @@ namespace Microsoft.AspNet.SignalR.StockTicker
                 {
                     _updatingStockPrices = true;
 
-                    var isupdate = false;
+                    //var isupdate = false;
                     foreach (var stock in _stocks.Values)
                     {
                         if (TryUpdateStockPrice(stock))
                         {
                             BroadcastStockPrice(stock);
-                            isupdate = true;
+                      //      isupdate = true;
                         }
                     }
                     //if (isupdate)
