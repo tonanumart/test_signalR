@@ -191,7 +191,7 @@
   <ItemGroup>
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
-    <Content Include="Excel\Book1.xlsx" />
+    <Content Include="Excel\Book1.xls" />
     <None Include="Properties\PublishProfiles\SignalR_Test.pubxml" />
     <None Include="Scripts\jquery-1.6.4-vsdoc.js" />
     <Content Include="Scripts\jquery-1.6.4.js" />

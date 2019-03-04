@@ -42,10 +42,11 @@ namespace TestNLog
         private static void Log(Exception e)
         {
             //MessageBox.Show("some error");
-            var logger = NLog.LogManager.GetLogger("Other");
+            var logger = NLog.LogManager.GetCurrentClassLogger();
             logger.Info(e);
             //logger.Debug(e);
         }
+
 
        
     }

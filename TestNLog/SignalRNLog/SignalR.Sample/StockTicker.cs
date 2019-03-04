@@ -126,10 +126,40 @@ namespace Microsoft.AspNet.SignalR.StockTicker
 
         private void LoadDefaultStocks()
         {
-            var excel = new ExcelQueryFactory(Path.Combine(filePath,"Book1"));
-            var list = from c in excel.Worksheet<Transaction_UserOnline_Result>()
-                       select c;
-            _list = list.ToList();
+            var excel = new ExcelQueryFactory(Path.Combine(filePath, "Book1.xls"));
+            //var list = from c in excel.Worksheet<Transaction_UserOnline_Result>()
+            //           select c;
+            //_list = list.ToList();
+            var _int = new int[]{
+                362
+                ,16
+                ,362
+                ,107
+                ,18
+                ,362
+                ,20
+                ,18
+                ,19
+                ,56
+                ,362 
+            };
+            for (int i = 0; i < 11; i++)
+            {
+                var topicId = 8000 + i;
+                for (int j = 0; j < _int[i]; j++)
+                {
+                    _list.Add(new Transaction_UserOnline_Result()
+                    {
+                        TransId = topicId,
+                        UserId = j,
+                        TopicName = "[โปรโมชั่น] แจ้งพิมพ์ป้ายราคา และติดสื่อ โปรโมชั่นเปิดสาขาใหม่ เดือน มี.ค. 62 เฉพาะสาขาชุมชนในชาก จำนวน 4 โปรโมชั่น (892 รายการ)",
+                        DeviceId = "BFEBFBFF000406E3C41D9F7D",
+                        DeviceName = "DESKTOP-LH8AVTL",
+                        CompanyId = 157,
+                        FCMToken = "dALfQeNSZ9E:APA91bEsyMWbnKGBu5Q80vD5yFmd8wzqPNbTLIIJSlAtfneAMn6gxxVMkBuRJmmMuQCVYqcBJNuHD6Lzch2wXnhm8tsI7yOeRZCj9zZb5_EKUluC5Wx8qANJrD543rzLKS2R8_UJJXef"
+                    });
+                }
+            }
         }
 
         private void UpdateStockPrices(object state)
@@ -203,12 +233,16 @@ namespace Microsoft.AspNet.SignalR.StockTicker
             int nextId = 0;
             foreach (var client in groupByClient)
             {
-                string clientId = this.users[nextId];
-                Clients.Client(clientId).testMessageCall(new
+                string clientId = string.Empty;
+                bool canGet = this.users.TryGetValue(nextId,out clientId);
+                if (!string.IsNullOrWhiteSpace(clientId))
                 {
-                    list = client.Items,
-                    count = timeCount
-                });
+                    Clients.Client(clientId).testMessageCall(new
+                    {
+                        list = client.Items,
+                        count = timeCount
+                    });
+                } 
                 nextId++;
             }
         }

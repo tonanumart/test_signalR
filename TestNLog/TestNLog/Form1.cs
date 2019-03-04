@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using TestNLog.Background;
+using TestNLog.MySystem;
 
 namespace TestNLog
 {
@@ -21,7 +22,7 @@ namespace TestNLog
             this.signalRWorker.DoWork += SignalRController.DoWork;
             this.signalRWorker.ProgressChanged += (sender, progress) =>
             {
-                var data = progress.UserState as SignalRSResult; 
+                var data = progress.UserState as SignalRSResult;
                 if (data != null)
                 {
                     singleStatus.SignalR = data.EnumValue;
@@ -33,7 +34,30 @@ namespace TestNLog
 
         private void button1_Click(object sender, EventArgs a)
         {
+            callStack1();
+        }
 
+        private void callStack1()
+        {
+            callStack2();
+        }
+
+        private void callStack2()
+        {
+            callStack3();
+        }
+
+        private void callStack3()
+        {
+            try
+            {
+                throw new Exception("Trace Log");
+            }
+            catch (Exception e)
+            {
+                var logger = NLog.LogManager.GetCurrentClassLogger();
+                logger.Info(e);
+            }
         }
 
 
@@ -51,6 +75,12 @@ namespace TestNLog
         private void cancelBtn_Click(object sender, EventArgs e)
         {
             this.cancelBtn.Enabled = false;
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            TestThrows.WhereIsMyFile();
+
         }
 
 
