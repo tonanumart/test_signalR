@@ -26,16 +26,16 @@ namespace SignalRNLog.Controllers
             return View();
         }
          
-        public ActionResult TestLogin(string username, string password)
-        {
-            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
-                return RedirectToAction("Index");
+        //public ActionResult TestLogin(string username, string password)
+        //{
+        //    if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+        //        return RedirectToAction("Index");
 
 
-            SessionContext context = new SessionContext();
-            context.SetAuthenticationToken(username, false, new User() {  FirstName = "Anumart" , LastName = "Chaichana" });
+        //    SessionContext context = new SessionContext();
+        //    context.SetAuthenticationToken(username, false, new User() {  FirstName = "Anumart" , LastName = "Chaichana" });
 
-            return RedirectToAction("MVCLogin");
-        }
+        //    return RedirectToAction("MVCLogin");
+        //}
     }
 }
