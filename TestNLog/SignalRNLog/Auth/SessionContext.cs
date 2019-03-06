@@ -6,7 +6,7 @@ using System.Web;
 using System.Web.Script.Serialization;
 using System.Web.Security;
 
-namespace SignalRNLog.Controllers
+namespace SignalRNLog.Auth
 {
     public class SessionContext
     {

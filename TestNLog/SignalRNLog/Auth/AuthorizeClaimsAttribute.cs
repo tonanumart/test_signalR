@@ -5,19 +5,19 @@ using System.Linq;
 using System.Security.Claims;
 using System.Web;
 
-namespace SignalRNLog.SignalR.Sample
+namespace SignalRNLog.Auth
 {
     [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
     public class AuthorizeClaimsAttribute : AuthorizeAttribute
     {
         protected override bool UserAuthorized(System.Security.Principal.IPrincipal user)
         {
-            NLog.ILogger logger = NLog.LogManager.GetCurrentClassLogger(); 
-
+            NLog.ILogger logger = NLog.LogManager.GetCurrentClassLogger();
+            logger.Info("Client Auth");
             if (user == null)
             {
                 logger.Info("Anonymous User (null user)");
-                return true;
+                return false;
                 //throw new ArgumentNullException("user");
             }
 
@@ -25,20 +25,25 @@ namespace SignalRNLog.SignalR.Sample
 
             if (principal != null)
             {
-                Claim authenticated = principal.FindFirst(ClaimTypes.Authentication);
-                if (authenticated != null && authenticated.Value == "true")
+
+                var userName = principal.FindFirst(ClaimTypes.Name).Value;
+                if (!string.IsNullOrWhiteSpace(userName))
                 {
+                    logger.Info("Found Info Name"+userName);
+                    //logger.Info("Found Info AuthType" + principal.FindFirst(ClaimTypes.AuthenticationMethod).Value);
+                    //logger.Info("Found Info IsAuth" + principal.FindFirst(ClaimTypes.Authentication).Value);
                     return true;
                 }
                 else
                 {
+                    logger.Info("Invalid Claim");
                     return false;
                 }
             }
             else
             {
                 logger.Info("Anonymous principal");
-                return true;
+                return false;
             }
         }
     }
