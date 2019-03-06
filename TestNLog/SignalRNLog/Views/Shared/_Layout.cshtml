@@ -18,7 +18,7 @@
                 <nav>
                     <ul id="menu">
                         <li>@Html.ActionLink("Home", "Index", "Home", new { area = "" }, null)</li>
-                        <li>@Html.ActionLink("API", "Index", "Help", new { area = "" }, null)</li>
+                        <li><a href="~/SignalR.Sample/StockTicker.html">SignalR</a></li>
                     </ul>
                 </nav>
             </div>
@@ -28,5 +28,20 @@
 
     @Scripts.Render("~/bundles/jquery")
     @RenderSection("scripts", required: false)
+
+
+    <div>
+        Infomation User
+        <div>
+            Name : @ViewBag.Name 
+        </div>
+        <div>
+            AuthType : @ViewBag.AuthType 
+        </div>
+        <div>
+            Is Auth : @ViewBag.IsAuth 
+        </div> 
+    </div>
+
 </body>
 </html>

@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNet.SignalR.Hubs;
+using SignalRNLog.SignalR.Sample;
 
 namespace Microsoft.AspNet.SignalR.StockTicker
 {
     [HubName("stockTicker")]
+    [Authorize]
     public class StockTickerHub : Hub
     {
         private readonly StockTicker _stockTicker;

@@ -48,12 +48,14 @@
             this.labelOpen = new System.Windows.Forms.Label();
             this.labelClose = new System.Windows.Forms.Label();
             this.labelCall = new System.Windows.Forms.Label();
+            this.serverText = new System.Windows.Forms.TextBox();
+            this.button2 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.SuspendLayout();
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(148, 12);
+            this.button1.Location = new System.Drawing.Point(148, 66);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 0;
@@ -63,7 +65,7 @@
             // 
             // numericUpDown1
             // 
-            this.numericUpDown1.Location = new System.Drawing.Point(22, 14);
+            this.numericUpDown1.Location = new System.Drawing.Point(22, 68);
             this.numericUpDown1.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -240,11 +242,31 @@
             this.labelCall.TabIndex = 20;
             this.labelCall.Text = "0";
             // 
+            // serverText
+            // 
+            this.serverText.Location = new System.Drawing.Point(22, 23);
+            this.serverText.Name = "serverText";
+            this.serverText.Size = new System.Drawing.Size(201, 20);
+            this.serverText.TabIndex = 21;
+            this.serverText.Text = "http://192.168.0.98/";
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(229, 21);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(46, 23);
+            this.button2.TabIndex = 22;
+            this.button2.Text = "Reset";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(532, 262);
+            this.Controls.Add(this.button2);
+            this.Controls.Add(this.serverText);
             this.Controls.Add(this.labelCall);
             this.Controls.Add(this.labelClose);
             this.Controls.Add(this.labelOpen);
@@ -295,6 +317,8 @@
         private System.Windows.Forms.Label labelOpen;
         private System.Windows.Forms.Label labelClose;
         private System.Windows.Forms.Label labelCall;
+        private System.Windows.Forms.TextBox serverText;
+        private System.Windows.Forms.Button button2;
     }
 }
 

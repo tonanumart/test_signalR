@@ -14,16 +14,22 @@ namespace SignalRNLog.Controllers
         public IEnumerable<string> Get()
         {
             Logger logger = LogManager.GetCurrentClassLogger();
-            logger.Info("Sample informational message in api/values"); 
+            logger.Info("Sample informational message in api/values");
             var test = 0;
             var result = 133 / test;
             return new string[] { "value1", "value2" };
         }
 
         // GET api/values/5
-        public string Get(int id)
+        [Authorize]
+        public MyClass Get(int id)
         {
-            return "value";
+            return new MyClass
+            {
+                Name = User.Identity.Name,
+                AuthType = User.Identity.AuthenticationType,
+                IsAuth = User.Identity.IsAuthenticated
+            };
         }
 
         // POST api/values
@@ -40,5 +46,16 @@ namespace SignalRNLog.Controllers
         public void Delete(int id)
         {
         }
+    }
+
+
+    public class MyClass
+    {
+
+        public string Name { get; set; }
+
+        public string AuthType { get; set; }
+
+        public bool IsAuth { get; set; }
     }
 }

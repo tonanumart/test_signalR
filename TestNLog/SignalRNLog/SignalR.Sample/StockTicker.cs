@@ -23,7 +23,7 @@ namespace Microsoft.AspNet.SignalR.StockTicker
         // Stock can go up or down by a percentage of this factor on each change
         private readonly double _rangePercent = 0.002;
 
-        private readonly TimeSpan _updateInterval = TimeSpan.FromMilliseconds(200);
+        private readonly TimeSpan _updateInterval = TimeSpan.FromMilliseconds(5000);
         private readonly Random _updateOrNotRandom = new Random();
 
         private Timer _timer;
@@ -123,7 +123,7 @@ namespace Microsoft.AspNet.SignalR.StockTicker
 
             stocks.ForEach(stock => _stocks.TryAdd(stock.Symbol, stock));
            //_list.AddRange(MessageFactory.MockOver_4Kb());
-           MockXItems(120); 
+           MockXItems(6); 
         }
 
         private void MockXItems(int x)
@@ -177,18 +177,15 @@ namespace Microsoft.AspNet.SignalR.StockTicker
                 if (!_updatingStockPrices)
                 {
                     _updatingStockPrices = true;
-
-                    var isupdate = false;
+                     
                     foreach (var stock in _stocks.Values)
                     {
                         if (TryUpdateStockPrice(stock))
                         {
-                            BroadcastStockPrice(stock);
-                            isupdate = true;
+                            BroadcastStockPrice(stock); 
                         }
                     }
-                    //if (isupdate)
-                    //    CloseMarket();
+                    BroadcastNews();
                     _updatingStockPrices = false;
                 }
             }
@@ -237,6 +234,10 @@ namespace Microsoft.AspNet.SignalR.StockTicker
         private void BroadcastStockPrice(Stock stock)
         {
             Clients.All.updateStockPrice(stock);
+        }
+
+        private void BroadcastNews()
+        {
             timeCount++;
             Clients.All.testMessageCall(new
             {

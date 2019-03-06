@@ -1,4 +1,5 @@
 ﻿using Owin;
+using SignalRNLog.App_Start;
 
 namespace Microsoft.AspNet.SignalR.StockTicker
 {
@@ -7,8 +8,8 @@ namespace Microsoft.AspNet.SignalR.StockTicker
         public static void ConfigureSignalR(IAppBuilder app)
         {
             // For more information on how to configure your application using OWIN startup, visit http://go.microsoft.com/fwlink/?LinkID=316888
-
-             app.MapSignalR();
+            GlobalHost.HubPipeline.AddModule(new SignalrErrorHandler());
+            app.MapSignalR();
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNet.SignalR.Client;
+using Microsoft.AspNet.SignalR.Client.Transports;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -23,7 +24,24 @@ namespace ClientSimulate
         }
 
         private readonly object labelLock = new object();
+
+        private readonly object logingLock = new object();
+
         private static Counter _counter = new Counter();
+
+        private static string LogText = string.Empty;
+
+
+        //private string logAutoLine(string logText)
+        //{
+        //    lock (logingLock)
+        //    {
+        //        LogText = string.Format("{0}{1}{2}", LogText, logText, "xxx");
+        //        //LogText = LogText.Split("xxx")
+        //                         //.Take(10).Join(Environment.NewLine);
+        //    }
+        //    return LogText;
+        //}
 
         private int AdjustValue(int adjust, Microsoft.AspNet.SignalR.Client.ConnectionState state)
         {
@@ -92,29 +110,44 @@ namespace ClientSimulate
         private async void button1_Click(object sender, EventArgs e)
         {
             button1.Enabled = false;
+            try
+            {
+                await CreateConnectionAsync();
+            }
+            catch (Exception ex)
+            {
+                //logTextBox.LabelAssign(logAutoLine("CreateConnectionAsync Err : " + ex.Message));
+            }
+
+        }
+
+        private async Task CreateConnectionAsync()
+        {
             List<Task> start = new List<Task>();
             for (int i = 0; i < numericUpDown1.Value; i++)
             {
                 try
                 {
-                    await StartHub(i + 1);
+                    //await StartHub(i + 1);
+                    start.Add(StartHub(i + 1));
                 }
                 catch (Exception ex)
                 {
-                    lock (labelLock)
-                    {
-                        var text = logTextBox.Text;
-                        logTextBox.LabelAssign(string.Format("{0}{1}{2}", text, Environment.NewLine, "Loop Err : " + ex.Message));
-                    }
+                    //logTextBox.LabelAssign(logAutoLine("Loop Err : " + ex.Message));
                 }
 
             }
+            await Task.WhenAll(start);
+            //logTextBox.LabelAssign(logAutoLine("Loop Start Complete"));
         }
 
-        private async Task StartHub(int id)
+        private async Task<object> StartHub(int id)
         {
-            var hubConnection = new HubConnection("http://localhost:1707/");
+            var hubConnection = new HubConnection(serverText.Text);
+
             IHubProxy stockTickerHubProxy = hubConnection.CreateHubProxy("StockTicker");
+
+
             stockTickerHubProxy.On<Stock>("UpdateStockPrice", stock =>
             {
                 //this.logTextBox.Text = stock.PercentChange+"";
@@ -125,6 +158,7 @@ namespace ClientSimulate
             {
                 var num = this.AdjustValue(1, "Call", id);
                 labelCall.LabelAssign(num + "");
+                //logTextBox.LabelAssign(logAutoLine("Client " + id + " Receive : " + result.list.Count));
             });
 
             stockTickerHubProxy.On("MarketOpened", () =>
@@ -142,14 +176,7 @@ namespace ClientSimulate
             });
 
 
-            hubConnection.Error += (e) =>
-            {
-                lock (labelLock)
-                {
-                    var text = logTextBox.Text;
-                    logTextBox.LabelAssign(string.Format("{0}{1}{2}", text, Environment.NewLine, "Client : " + id + "  " + e.Message));
-                }
-            };
+
 
             hubConnection.StateChanged += (e) =>
             {
@@ -170,15 +197,31 @@ namespace ClientSimulate
                     int new_state = AdjustValue(1, e.NewState);
                     new_label.LabelAssign(new_state + "");
                 }
+                //logTextBox.LabelAssign(logAutoLine(id + " " + e.NewState.ToString()));
+            };
+
+            hubConnection.Error += (e) =>
+            {
+                //logTextBox.LabelAssign(logAutoLine("Client : " + id + " err : " + e.Message));
             };
 
             hubConnection.Closed += () =>
             {
                 int num = AdjustValue(1, "Close", id);
                 closeLabel.LabelAssign(num + "");
+                //logTextBox.LabelAssign(logAutoLine(id + " Closed"));
             };
 
-            await hubConnection.Start();
+            if (id % 5 != 0)
+            {
+                await hubConnection.Start();
+            }
+            else
+            {
+                await hubConnection.Start(new LongPollingTransport());
+            }
+
+            return Task.FromResult<object>(1);
         }
 
         private Label swichLabeL(Microsoft.AspNet.SignalR.Client.ConnectionState connectionState)
@@ -193,22 +236,37 @@ namespace ClientSimulate
             return null;
         }
 
+        private void button2_Click(object sender, EventArgs e)
+        {
+            serverText.Text = "http://localhost/";
+        }
+
     }
 
     public static class ExtensionLabel
     {
+
+        public static object ui = new object();
+
         public static void LabelAssign(this Control label, string num)
         {
             if (label.InvokeRequired)
             {
                 label.BeginInvoke((MethodInvoker)delegate()
                 {
-                    label.Text = num;
+                    lock (ui)
+                    {
+                        label.Text = num;
+                    }
+
                 });
             }
             else
             {
-                label.Text = num;
+                lock (ui)
+                {
+                    label.Text = num;
+                }
             }
         }
     }
