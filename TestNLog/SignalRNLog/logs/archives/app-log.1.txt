@@ -1,4 +1,0 @@
-2019-03-06 17:01:13.4153|INFO|SignalRNLog.Auth.AuthorizeClaimsAttribute|Client Auth
-2019-03-06 17:01:13.4153|INFO|SignalRNLog.Auth.AuthorizeClaimsAttribute|Invalid Claim
-2019-03-06 17:01:15.4645|INFO|SignalRNLog.Auth.AuthorizeClaimsAttribute|Client Auth
-2019-03-06 17:01:15.4645|INFO|SignalRNLog.Auth.AuthorizeClaimsAttribute|Invalid Claim

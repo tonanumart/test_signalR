@@ -19,6 +19,11 @@ namespace SignalRNLog
             AreaRegistration.RegisterAllAreas();
 
             WebApiConfig.Register(GlobalConfiguration.Configuration);
+            AfterWebAPIRegister();
+        }
+
+        private static void AfterWebAPIRegister()
+        {
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
