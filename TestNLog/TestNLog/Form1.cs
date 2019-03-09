@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -13,6 +14,8 @@ namespace TestNLog
 {
     public partial class Form1 : Form
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         private static BackgroundStatus singleStatus;
         private static int InitWait = 1000;
         public Form1()
@@ -51,6 +54,32 @@ namespace TestNLog
         private void cancelBtn_Click(object sender, EventArgs e)
         {
             this.cancelBtn.Enabled = false;
+        }
+
+        private void logchangeBtn_Click(object sender, EventArgs e)
+        {
+            reconfigLog();
+        }
+
+        
+
+        private void reconfigLog()
+        {
+            var factory = new LogFactory(LogManager.Configuration);
+            var config = factory.Configuration;
+            var target = config.FindTargetByName("logfile");
+            foreach (var rules in config.LoggingRules)
+            {
+                rules.Targets.Clear();
+                rules.Targets.Add(target);
+            } 
+            factory.ReconfigExistingLoggers();
+            LogManager.Configuration.Reload();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            logger.Info("Test Log Click");
         }
 
 

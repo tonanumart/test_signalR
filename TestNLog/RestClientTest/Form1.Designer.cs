@@ -70,7 +70,7 @@
             // 
             this.statusTextBox.BackColor = System.Drawing.SystemColors.Menu;
             this.statusTextBox.Enabled = false;
-            this.statusTextBox.Location = new System.Drawing.Point(251, 13);
+            this.statusTextBox.Location = new System.Drawing.Point(294, 12);
             this.statusTextBox.Name = "statusTextBox";
             this.statusTextBox.Size = new System.Drawing.Size(100, 20);
             this.statusTextBox.TabIndex = 2;
@@ -79,7 +79,7 @@
             // asyncCheckbox
             // 
             this.asyncCheckbox.AutoSize = true;
-            this.asyncCheckbox.Location = new System.Drawing.Point(371, 15);
+            this.asyncCheckbox.Location = new System.Drawing.Point(234, 14);
             this.asyncCheckbox.Name = "asyncCheckbox";
             this.asyncCheckbox.Size = new System.Drawing.Size(54, 17);
             this.asyncCheckbox.TabIndex = 3;
@@ -88,15 +88,17 @@
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(27, 80);
+            this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.progressBar1.Location = new System.Drawing.Point(50, 80);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(458, 23);
+            this.progressBar1.Size = new System.Drawing.Size(646, 23);
             this.progressBar1.TabIndex = 4;
             // 
             // asyncTextLabel
             // 
             this.asyncTextLabel.AutoSize = true;
-            this.asyncTextLabel.Location = new System.Drawing.Point(24, 46);
+            this.asyncTextLabel.Location = new System.Drawing.Point(29, 85);
             this.asyncTextLabel.Name = "asyncTextLabel";
             this.asyncTextLabel.Size = new System.Drawing.Size(13, 13);
             this.asyncTextLabel.TabIndex = 5;
@@ -104,16 +106,21 @@
             // 
             // textBox1
             // 
+            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox1.BackColor = System.Drawing.SystemColors.Info;
             this.textBox1.Location = new System.Drawing.Point(27, 123);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(458, 159);
+            this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox1.Size = new System.Drawing.Size(669, 242);
             this.textBox1.TabIndex = 6;
-            this.textBox1.Text = "Log...";
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(445, 9);
+            this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button2.Location = new System.Drawing.Point(656, 10);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(75, 23);
             this.button2.TabIndex = 7;
@@ -125,7 +132,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(532, 309);
+            this.ClientSize = new System.Drawing.Size(743, 392);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.asyncTextLabel);

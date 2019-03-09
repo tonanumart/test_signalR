@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -8,6 +9,7 @@ namespace TestNLog
 {
     static class Program
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -30,23 +32,14 @@ namespace TestNLog
 
         static void ApplicationError(object sender, ThreadExceptionEventArgs e)
         {
-            Log(e.Exception);
+            logger.Error(e.Exception);
         }
 
         static void SMKOtherErrorHandle(object sender, UnhandledExceptionEventArgs e)
         {
-            Log(e.ExceptionObject as Exception);
+            logger.Error(e.ExceptionObject as Exception);
 
-        }
-
-        private static void Log(Exception e)
-        {
-            //MessageBox.Show("some error");
-            var logger = NLog.LogManager.GetLogger("Other");
-            logger.Info(e);
-            //logger.Debug(e);
-        }
-
+        } 
        
     }
 }

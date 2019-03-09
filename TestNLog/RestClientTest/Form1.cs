@@ -1,4 +1,5 @@
-﻿using RestClientTest.Cls;
+﻿using NLog;
+using RestClientTest.Cls;
 using RestClientTest.Cls.Models;
 using RestSharp;
 using System;
@@ -15,6 +16,7 @@ namespace RestClientTest
 {
     public partial class Form1 : Form
     {
+        public static Logger logger = LogManager.GetCurrentClassLogger();
         public Form1()
         {
             InitializeComponent();
@@ -36,20 +38,30 @@ namespace RestClientTest
             statusTextBox.Text = "Finish";
         }
 
-        private void SyncReq()
+
+
+        private static string NumString(int i)
         {
-            for (int i = 0; i < numericUpDown1.Value; i++)
-            {
-                asyncTextLabel.Text = (i + 1).ToString();
-                var mRequest = TestConnection();
-                SmartkorpApi.Instance.Execute<Result>(mRequest);
-                progressBar1.Value++;
-            }
+            return string.Format("{0}", i + 1);
         }
 
         private static RestRequest TestConnection()
         {
-            return new RestRequest("Values/ValidateToken", Method.POST);
+            //return new RestRequest("Values", Method.GET);
+            return new RestRequest("Values/1", Method.GET);
+
+        }
+
+        private void SyncReq()
+        {
+            for (int i = 0; i < numericUpDown1.Value; i++)
+            {
+                asyncTextLabel.Text = NumString(i);
+                var mRequest = TestConnection();
+                SmartkorpApi.Instance.Execute<List<string>>(mRequest);
+                progressBar1.Value++;
+            }
+            logger.Info("All Requests Complete");
         }
 
         private async Task aSyncTotalReq()
@@ -58,16 +70,16 @@ namespace RestClientTest
             var progressIndicator = new Progress<string>(ReportProgress);
             for (int i = 0; i < numericUpDown1.Value; i++)
             {
-                asyncTextLabel.Text = (i + 1).ToString();
+                asyncTextLabel.Text = NumString(i);
                 var mRequest = TestConnection();
-                task.Add(SmartkorpApi.Instance.ExecuteAsync<Result>(mRequest, progressIndicator));
+                task.Add(SmartkorpApi.Instance.ExecuteAsync<List<string>>(mRequest, progressIndicator));
             }
             await Task.WhenAll(task);
+            logger.Info("All Requests Complete");
         }
 
         private void ReportProgress(string obj)
         {
-            textBox1.Text = string.Format("{0}{1}{2}", textBox1.Text, Environment.NewLine, obj);
             progressBar1.Value++;
         }
 

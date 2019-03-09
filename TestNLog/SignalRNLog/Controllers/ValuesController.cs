@@ -4,19 +4,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Web.Http;
 
 namespace SignalRNLog.Controllers
 {
     public class ValuesController : ApiController
     {
+        public static Random rand = new Random();
         // GET api/values
         public IEnumerable<string> Get()
         {
-            Logger logger = LogManager.GetCurrentClassLogger();
-            logger.Info("Sample informational message in api/values");
-            var test = 0;
-            var result = 133 / test;
+            Thread.Sleep(rand.Next(4) * 500);
             return new string[] { "value1", "value2" };
         }
 

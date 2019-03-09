@@ -8,5 +8,11 @@ namespace RestClientTest.Cls.Models
 {
     public class Result
     {
+
+    }
+
+    public class MyResult
+    {
+
     }
 }
