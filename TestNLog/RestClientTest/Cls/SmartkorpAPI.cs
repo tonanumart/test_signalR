@@ -24,11 +24,11 @@ namespace RestClientTest.Cls
         private SmartkorpApi()
         {
             var client = new RestClient(AppConfigurations.baseAPIURL);
-            // _client.Authenticator = new CustomAuthenticator();
+            client.Authenticator = new CustomAuthenticator(new TokenManager());
             _client = client;
         }
 
-        public Action GenReqId(RestRequest request)
+        public Action GenReqId(IRestRequest request)
         {
             var reqId = GenMethod();
             logger.Debug("========== Req {0} : Start ==========", reqId);
@@ -45,12 +45,11 @@ namespace RestClientTest.Cls
             lock (ct_lock)
             {
                 return Convert.ToString(counter++);
-            } 
-            //return Guid.NewGuid().ToString("N");
+            }
         }
 
         #region Request
-        public T Execute<T>(RestRequest request) where T : new()
+        public T Execute<T>(IRestRequest request) where T : new()
         {
             request.SetPreRequest();
             var logComplete = GenReqId(request);
@@ -60,26 +59,26 @@ namespace RestClientTest.Cls
             return result;
         }
 
-        public async Task<T> ExecuteAsync<T>(RestRequest request) where T : new()
+        public async Task<T> ExecuteAsync<T>(IRestRequest request) where T : new()
         {
             request.SetPreRequest();
             var logComplete = GenReqId(request);
             var response = await _client.ExecuteTaskAsync<T>(request);
             logComplete();
-            var result = ResponseValid<T>(response);
+            var result = await ResponseValidAsync<T>(response);
             return result;
         }
 
-        public async Task<T> ExecuteAsync<T>(RestRequest request, IProgress<string> progressIndicator) where T : new()
+        public async Task<T> ExecuteAsync<T>(IRestRequest request, IProgress<string> progressIndicator) where T : new()
         {
             try
             {
                 request.SetPreRequest();
                 var logComplete = GenReqId(request);
                 var response = await _client.ExecuteTaskAsync<T>(request);
-                progressIndicator.Report(string.Empty);
                 logComplete();
-                var result = ResponseValid<T>(response);
+                var result = await ResponseValidAsync<T>(response); 
+                progressIndicator.Report(string.Empty);
                 return result;
             }
             catch (Exception ex)
@@ -91,20 +90,80 @@ namespace RestClientTest.Cls
         }
         #endregion
 
+        private static List<RestRequest> wait_auth = new List<RestRequest>();
 
         #region Response
+        private async Task<T> ResponseValidAsync<T>(IRestResponse<T> response) where T : new()
+        {
+            var myAuth = _client.Authenticator as CustomAuthenticator;
+            var count = myAuth.DecreseRequest();
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                var newReq = CopyRequest<T>(response);
+                if (count > 0)
+                {
+                    logger.Info("waiting last request");
+                    wait_auth.Add(newReq);
+                    await Task.Run(async () =>
+                    {
+                        while (wait_auth.Count > 0)
+                        {
+                            await Task.Delay(100);
+                        }
+                    });
+                    var result = await this.ExecuteAsync<T>(newReq);
+                    return result;
+                }
+                else
+                {
+                    logger.Info("last request arrive");
+                    var taskAuth = myAuth.AuthenCheckAsycn<T>((newToken) =>
+                    {
+                        var result = this.Execute<T>(newReq);
+                        logger.Info("release waiting start ...");
+                        Task.Run(async () =>
+                        { 
+                            await Task.Delay(5000);
+                            logger.Info("release waiting end ...");
+                            wait_auth.Clear();
+                        });
+                        return result;
+                    });
+                    return await taskAuth;
+                }
+            }
+
+            return await Task.FromResult<T>(response.Data);
+        }
+
+
         private T ResponseValid<T>(IRestResponse<T> response) where T : new()
         {
-            int numericStatusCode = (int)response.StatusCode;
-            if (numericStatusCode == 401)
+            var myAuth = _client.Authenticator as CustomAuthenticator;
+            var count = myAuth.DecreseRequest();
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
-                logger.Info("{0} {1}", response.ResponseStatus, response.Content);
+                logger.Info("{0} {1}", response.StatusCode.ToString(), response.Content);
+                var newReq = CopyRequest<T>(response);
+                return myAuth.AuthenCheck<T>((newToken) =>
+                {
+                    return this.Execute<T>(newReq);
+                });
             }
-            else if (numericStatusCode > 200 && numericStatusCode < 301)
+            int numericStatusCode = (int)response.StatusCode;
+            if (numericStatusCode > 200 && numericStatusCode < 301)
             {
-                logger.Info("request complete");
+                logger.Info("{0} {1}", response.StatusCode.ToString(), response.Content);
             }
             return response.Data;
+        }
+
+        private static RestRequest CopyRequest<T>(IRestResponse<T> response) where T : new()
+        {
+            var oldReq = response.Request;
+            var newReq = new RestRequest(oldReq.Resource, oldReq.Method);
+            newReq.Parameters.AddRange(oldReq.Parameters.Where(x => x.Name != "Authorization"));
+            return newReq;
         }
 
         #endregion
@@ -114,7 +173,7 @@ namespace RestClientTest.Cls
 
     public static class RequestExtension
     {
-        public static RestRequest SetPreRequest(this RestRequest request)
+        public static IRestRequest SetPreRequest(this IRestRequest request)
         {
             request.AddHeader("Content-Type", "application/json");
             request.OnBeforeDeserialization = resp => { resp.ContentType = "application/json"; };

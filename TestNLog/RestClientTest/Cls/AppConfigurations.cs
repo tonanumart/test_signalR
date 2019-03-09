@@ -10,6 +10,7 @@ namespace RestClientTest.Cls
     public class AppConfigurations
     {
         public const string baseAPIURL = "http://localhost:1707/api/";
+        public const string baseURL = "http://localhost:1707/";
     }
 
     public static class UrlExtension

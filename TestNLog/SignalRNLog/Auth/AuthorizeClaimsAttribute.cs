@@ -30,8 +30,6 @@ namespace SignalRNLog.Auth
                 if (!string.IsNullOrWhiteSpace(userName))
                 {
                     logger.Info("Found Info Name"+userName);
-                    //logger.Info("Found Info AuthType" + principal.FindFirst(ClaimTypes.AuthenticationMethod).Value);
-                    //logger.Info("Found Info IsAuth" + principal.FindFirst(ClaimTypes.Authentication).Value);
                     return true;
                 }
                 else

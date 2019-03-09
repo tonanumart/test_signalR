@@ -36,6 +36,8 @@
             this.asyncTextLabel = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.button2 = new System.Windows.Forms.Button();
+            this.apiCheckBox = new System.Windows.Forms.CheckBox();
+            this.counterLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -51,7 +53,7 @@
             this.numericUpDown1.Size = new System.Drawing.Size(120, 20);
             this.numericUpDown1.TabIndex = 0;
             this.numericUpDown1.Value = new decimal(new int[] {
-            200,
+            5,
             0,
             0,
             0});
@@ -92,13 +94,14 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.progressBar1.Location = new System.Drawing.Point(50, 80);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(646, 23);
+            this.progressBar1.Size = new System.Drawing.Size(622, 23);
             this.progressBar1.TabIndex = 4;
             // 
             // asyncTextLabel
             // 
+            this.asyncTextLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.asyncTextLabel.AutoSize = true;
-            this.asyncTextLabel.Location = new System.Drawing.Point(29, 85);
+            this.asyncTextLabel.Location = new System.Drawing.Point(678, 86);
             this.asyncTextLabel.Name = "asyncTextLabel";
             this.asyncTextLabel.Size = new System.Drawing.Size(13, 13);
             this.asyncTextLabel.TabIndex = 5;
@@ -128,11 +131,34 @@
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
+            // apiCheckBox
+            // 
+            this.apiCheckBox.AutoSize = true;
+            this.apiCheckBox.Checked = true;
+            this.apiCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.apiCheckBox.Location = new System.Drawing.Point(234, 37);
+            this.apiCheckBox.Name = "apiCheckBox";
+            this.apiCheckBox.Size = new System.Drawing.Size(71, 17);
+            this.apiCheckBox.TabIndex = 8;
+            this.apiCheckBox.Text = "public api";
+            this.apiCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // counterLabel
+            // 
+            this.counterLabel.AutoSize = true;
+            this.counterLabel.Location = new System.Drawing.Point(26, 86);
+            this.counterLabel.Name = "counterLabel";
+            this.counterLabel.Size = new System.Drawing.Size(13, 13);
+            this.counterLabel.TabIndex = 9;
+            this.counterLabel.Text = "0";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(743, 392);
+            this.Controls.Add(this.counterLabel);
+            this.Controls.Add(this.apiCheckBox);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.asyncTextLabel);
@@ -159,6 +185,8 @@
         private System.Windows.Forms.Label asyncTextLabel;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.CheckBox apiCheckBox;
+        private System.Windows.Forms.Label counterLabel;
     }
 }
 

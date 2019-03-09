@@ -15,7 +15,7 @@ namespace SignalRNLog
     public class Startup
     {
         public void Configuration(IAppBuilder app)
-        { 
+        {
             HttpConfiguration config = GlobalConfiguration.Configuration;
             //HttpConfiguration config = new HttpConfiguration();
             ConfigureOAuth(app);
@@ -33,8 +33,9 @@ namespace SignalRNLog
             {
                 AllowInsecureHttp = true,
                 TokenEndpointPath = new PathString("/token"),
-                AccessTokenExpireTimeSpan = TimeSpan.FromMinutes(1),
-                Provider = new SimpleAuthorizationServerProvider()
+                AccessTokenExpireTimeSpan = TimeSpan.FromMinutes(20),
+                Provider = new SimpleAuthorizationServerProvider(),
+                RefreshTokenProvider = new SimpleRefreshTokenProvider()
             };
 
             // Token Generation

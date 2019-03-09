@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SignalRNLog.Auth
 {
-    public class User
+    public class UserInfo
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }

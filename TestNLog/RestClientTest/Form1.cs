@@ -45,9 +45,10 @@ namespace RestClientTest
             return string.Format("{0}", i + 1);
         }
 
-        private static RestRequest TestConnection()
+        private RestRequest TestConnection()
         {
-            //return new RestRequest("Values", Method.GET);
+            if(apiCheckBox.Checked)
+                return new RestRequest("Values", Method.GET);
             return new RestRequest("Values/1", Method.GET);
 
         }
@@ -81,6 +82,7 @@ namespace RestClientTest
         private void ReportProgress(string obj)
         {
             progressBar1.Value++;
+            counterLabel.Text = "" + progressBar1.Value;
         }
 
         private void button2_Click(object sender, EventArgs e)

@@ -1,4 +1,5 @@
 ﻿using NLog;
+using SignalRNLog.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,15 +16,16 @@ namespace SignalRNLog.Controllers
         // GET api/values
         public IEnumerable<string> Get()
         {
-            Thread.Sleep(rand.Next(4) * 500);
+            Thread.Sleep(rand.Next(5) * 1000);
             return new string[] { "value1", "value2" };
         }
 
         // GET api/values/5
         [Authorize]
-        public MyClass Get(int id)
+        public AuthViewModel Get(int id)
         {
-            return new MyClass
+            Thread.Sleep(rand.Next(10) * 1000);
+            return new AuthViewModel
             {
                 Name = User.Identity.Name,
                 AuthType = User.Identity.AuthenticationType,
@@ -48,13 +50,5 @@ namespace SignalRNLog.Controllers
     }
 
 
-    public class MyClass
-    {
-
-        public string Name { get; set; }
-
-        public string AuthType { get; set; }
-
-        public bool IsAuth { get; set; }
-    }
+   
 }

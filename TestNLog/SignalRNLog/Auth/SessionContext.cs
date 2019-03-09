@@ -10,7 +10,7 @@ namespace SignalRNLog.Auth
 {
     public class SessionContext
     {
-        public void SetAuthenticationToken(string name, bool isPersistant, User userData)
+        public void SetAuthenticationToken(string name, bool isPersistant, UserInfo userData)
         {
             string data = null;
             if (userData != null)

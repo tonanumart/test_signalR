@@ -186,16 +186,20 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\SignalrErrorHandler.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Models\AuthViewModel.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Auth\SessionContext.cs" />
-    <Compile Include="Auth\User.cs" />
+    <Compile Include="Auth\UserInfo.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Auth\AuthorizeClaimsAttribute.cs" />
+    <Compile Include="Providers\AuthKey.cs" />
+    <Compile Include="Providers\Models\RefreshToken.cs" />
     <Compile Include="Providers\SimpleAuthorizationServerProvider.cs" />
+    <Compile Include="Providers\SimpleRefreshTokenProvider.cs" />
     <Compile Include="SignalR.Sample\Example.cs" />
     <Compile Include="SignalR.Sample\Startup.cs" />
     <Compile Include="SignalR.Sample\Stock.cs" />
@@ -251,7 +255,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
