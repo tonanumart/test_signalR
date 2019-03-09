@@ -28,14 +28,14 @@ namespace RestClientTest.Cls
             _client = client;
         }
 
-        public Action GenReqId(IRestRequest request)
+        public Action<string> GenReqId(IRestRequest request)
         {
             var reqId = GenMethod();
             logger.Debug("========== Req {0} : Start ==========", reqId);
             logger.Info("Req to {0}", request.Resource.FullResource());
-            return () =>
+            return (status) =>
             {
-                logger.Debug("========== Req {0} : Complete ==========", reqId);
+                logger.Debug("========== Req {0} : " + status + " ==========", reqId);
             };
         }
         public static int counter = 1;
@@ -54,7 +54,7 @@ namespace RestClientTest.Cls
             request.SetPreRequest();
             var logComplete = GenReqId(request);
             var response = _client.Execute<T>(request);
-            logComplete();
+            logComplete(response.StatusCode.ToString());
             var result = ResponseValid<T>(response);
             return result;
         }
@@ -64,7 +64,7 @@ namespace RestClientTest.Cls
             request.SetPreRequest();
             var logComplete = GenReqId(request);
             var response = await _client.ExecuteTaskAsync<T>(request);
-            logComplete();
+            logComplete(response.StatusCode.ToString());
             var result = await ResponseValidAsync<T>(response);
             return result;
         }
@@ -76,7 +76,7 @@ namespace RestClientTest.Cls
                 request.SetPreRequest();
                 var logComplete = GenReqId(request);
                 var response = await _client.ExecuteTaskAsync<T>(request);
-                logComplete();
+                logComplete(response.StatusCode.ToString());
                 var result = await ResponseValidAsync<T>(response); 
                 progressIndicator.Report(string.Empty);
                 return result;

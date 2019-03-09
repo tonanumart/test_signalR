@@ -33,9 +33,10 @@ namespace RestClientTest.Cls
 
         private void AddHeader(IRestRequest request)
         {
-            logger.Debug("Start Authenticate Request");
+            if (!string.IsNullOrWhiteSpace(tokenManager.bearerToken.access_token))
+                logger.Debug("Add Bearer {0}", tokenManager.bearerToken.access_token.Substring(0,10));
             request.AddHeader("Authorization", string.Format("{0} {1}", tokenManager.bearerToken.token_type, tokenManager.bearerToken.access_token));
-            logger.Debug("End Authenticate Request");
+            //logger.Debug("End Authenticate Request");
         }
 
 
@@ -53,16 +54,23 @@ namespace RestClientTest.Cls
 
         public T AuthenCheck<T>(Func<string, T> callback)
         {
+            logger.Debug("AuthenCheck");
             lock (TokenManager.refreshToken)
             {
+                logger.Debug("AuthenCheck lock");
                 if (NoTokenMustLogin())
                 {
-                    return LoginToServer<T>(callback);
+                    var result = LoginToServer<T>(callback);
+                    logger.Debug("AuthenCheck release");
+                    return result;
                 }
                 else
                 {
-                    return RefreshToken<T>(callback);
+                    var result = RefreshToken<T>(callback);
+                    logger.Debug("AuthenCheck release");
+                    return result;
                 }
+
             }
         }
 
