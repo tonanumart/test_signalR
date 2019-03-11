@@ -16,7 +16,7 @@ namespace RestClientTest
 {
     public partial class Form1 : Form
     {
-        public static Logger logger = LogManager.GetCurrentClassLogger();
+        public static Logger logger = LogManager.GetLogger("log1");
         public Form1()
         {
             InitializeComponent();
@@ -47,7 +47,7 @@ namespace RestClientTest
 
         private RestRequest TestConnection()
         {
-            if(apiCheckBox.Checked)
+            if (apiCheckBox.Checked)
                 return new RestRequest("Values", Method.GET);
             return new RestRequest("Values/1", Method.GET);
 
@@ -101,6 +101,13 @@ namespace RestClientTest
             {
                 MessageBox.Show("Cancel");
             }
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            AsyncTestForm test = new AsyncTestForm(this);
+            this.Hide();
+            test.Show();
         }
     }
 }

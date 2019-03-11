@@ -10,7 +10,7 @@ namespace RestClientTest.Cls
 {
     public class SmartkorpApi
     {
-        public static Logger logger = LogManager.GetCurrentClassLogger();
+        public static Logger logger = LogManager.GetLogger("log1");
 
         public Random x = new Random();
         readonly IRestClient _client;

@@ -61,6 +61,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AsyncTestForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AsyncTestForm.Designer.cs">
+      <DependentUpon>AsyncTestForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Cls\AppConfigurations.cs" />
     <Compile Include="Cls\BearerToken.cs" />
     <Compile Include="Cls\CustomAuthenticator.cs" />
@@ -76,6 +82,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="AsyncTestForm.resx">
+      <DependentUpon>AsyncTestForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
