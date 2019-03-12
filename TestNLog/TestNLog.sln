@@ -24,7 +24,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RestSharpUpload", "RestShar
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestJoin", "TestJoin\TestJoin.csproj", "{1ECF8B3C-9850-47DA-8E48-3615E21CCA29}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test_Background", "Test_Background\Test_Background.csproj", "{FBE32428-7BF9-4D62-8492-3A0561A4D347}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SemaphoreForm", "Test_Background\SemaphoreForm.csproj", "{FBE32428-7BF9-4D62-8492-3A0561A4D347}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
