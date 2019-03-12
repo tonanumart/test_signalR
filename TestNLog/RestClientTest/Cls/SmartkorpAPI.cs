@@ -4,7 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace RestClientTest.Cls
 {
@@ -77,7 +79,7 @@ namespace RestClientTest.Cls
                 var logComplete = GenReqId(request);
                 var response = await _client.ExecuteTaskAsync<T>(request);
                 logComplete(response.StatusCode.ToString());
-                var result = await ResponseValidAsync<T>(response); 
+                var result = await ResponseValidAsync<T>(response);
                 progressIndicator.Report(string.Empty);
                 return result;
             }
@@ -90,57 +92,48 @@ namespace RestClientTest.Cls
         }
         #endregion
 
+        private static SemaphoreSlim authOne = new SemaphoreSlim(1);
+
         private static List<RestRequest> wait_auth = new List<RestRequest>();
 
         #region Response
         private async Task<T> ResponseValidAsync<T>(IRestResponse<T> response) where T : new()
         {
             var myAuth = _client.Authenticator as CustomAuthenticator;
-            var count = myAuth.DecreseRequest();
+            logger.Debug("Response Valid Async {0}", response.StatusCode.ToString());
             if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
                 var newReq = CopyRequest<T>(response);
-                if (count > 0)
-                {
-                    logger.Info("waiting last request");
-                    wait_auth.Add(newReq);
-                    await Task.Run(async () =>
-                    {
-                        while (wait_auth.Count > 0)
-                        {
-                            await Task.Delay(100);
-                        }
-                    });
+                var waitCheck = await authOne.WaitAsync(0);
+                if (waitCheck)
+                {//only one make auth
+                    logger.Info("only one make auth");
+                    await myAuth.AuthenCheckAsync();
                     var result = await this.ExecuteAsync<T>(newReq);
+                    //await Task.Delay(1000);
+                    authOne.Release();
                     return result;
                 }
                 else
-                {
-                    logger.Info("last request arrive");
-                    var taskAuth = myAuth.AuthenCheckAsycn<T>((newToken) =>
+                { //wait until authorize send signal
+                    logger.Info("waiting .......");
+                    var canRequest = await authOne.WaitAsync(0);
+                    while (!canRequest)
                     {
-                        var result = this.Execute<T>(newReq);
-                        logger.Info("release waiting start ...");
-                        Task.Run(async () =>
-                        { 
-                            await Task.Delay(5000);
-                            logger.Info("release waiting end ...");
-                            wait_auth.Clear();
-                        });
-                        return result;
-                    });
-                    return await taskAuth;
+                        canRequest = await authOne.WaitAsync(TimeSpan.FromMilliseconds(100));
+                    }
+                    authOne.Release();
+                    var result = await this.ExecuteAsync<T>(newReq);
                 }
             }
-
-            return await Task.FromResult<T>(response.Data);
+            return response.Data;
         }
 
 
         private T ResponseValid<T>(IRestResponse<T> response) where T : new()
         {
             var myAuth = _client.Authenticator as CustomAuthenticator;
-            var count = myAuth.DecreseRequest();
+            logger.Debug("Response Valid {0}", response.StatusCode.ToString());
             if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
                 logger.Info("{0} {1}", response.StatusCode.ToString(), response.Content);
@@ -153,6 +146,7 @@ namespace RestClientTest.Cls
             int numericStatusCode = (int)response.StatusCode;
             if (numericStatusCode > 200 && numericStatusCode < 301)
             {
+                Application.DoEvents();
                 logger.Info("{0} {1}", response.StatusCode.ToString(), response.Content);
             }
             return response.Data;

@@ -14,8 +14,8 @@ namespace RestClientTest.Cls
 
         private TokenManager tokenManager;
 
-        private static int request_count = 0;
-        private static object lock_count = new object();
+        //private static int request_count = 0;
+        //private static object lock_count = new object();
 
         public CustomAuthenticator(TokenManager tokenManager)
         {
@@ -24,27 +24,25 @@ namespace RestClientTest.Cls
 
         public void Authenticate(IRestClient client, IRestRequest request)
         {
-            lock (lock_count)
-            {
-                request_count++;
-            }
+            //lock (lock_count)
+            //{
+            //    request_count++;
+            //}
             AddHeader(request);
         }
 
         private void AddHeader(IRestRequest request)
         {
             if (!string.IsNullOrWhiteSpace(tokenManager.bearerToken.access_token))
-                logger.Debug("Add Bearer {0}", tokenManager.bearerToken.access_token.Substring(0,10));
+                logger.Debug("Add Bearer {0}", tokenManager.bearerToken.access_token.Substring(0, 10));
             request.AddHeader("Authorization", string.Format("{0} {1}", tokenManager.bearerToken.token_type, tokenManager.bearerToken.access_token));
             //logger.Debug("End Authenticate Request");
         }
 
 
-
-        private void NotifyOtherRequest(IRestResponse<BearerToken> result)
+        private void UpdateBearerToken(IRestResponse<BearerToken> result)
         {
             this.tokenManager.bearerToken = result.Data;
-            // this.wait_loging_requests.Clear();
         }
 
         private bool NoTokenMustLogin()
@@ -55,33 +53,73 @@ namespace RestClientTest.Cls
         public T AuthenCheck<T>(Func<string, T> callback)
         {
             logger.Debug("AuthenCheck");
-            lock (TokenManager.refreshToken)
-            {
-                logger.Debug("AuthenCheck lock");
-                if (NoTokenMustLogin())
-                {
-                    var result = LoginToServer<T>(callback);
-                    logger.Debug("AuthenCheck release");
-                    return result;
-                }
-                else
-                {
-                    var result = RefreshToken<T>(callback);
-                    logger.Debug("AuthenCheck release");
-                    return result;
-                }
 
+            if (NoTokenMustLogin())
+            {
+                var result = LoginToServer<T>(callback);
+                return result;
+            }
+            else
+            {
+                var result = RefreshToken<T>(callback);
+                return result;
             }
         }
 
-        public async Task<T> AuthenCheckAsycn<T>(Func<string, T> callback)
+        public async Task AuthenCheckAsync()
         {
-            return await Task.Run<T>(() =>
+            logger.Info("AuthenCheck"); 
+            if (NoTokenMustLogin())
             {
-                return AuthenCheck<T>(callback);
-            });
+                await LoginToServerAsync(); 
+            }
+            else
+            {
+                await RefreshTokenAsync();
+            }
+        } 
+
+        private async Task LoginToServerAsync()
+        {
+            logger.Info("Login To server");
+            var client = new RestClient(AppConfigurations.baseURL);
+            var request = new RestRequest("token", Method.POST);
+            request.AddParameter("grant_type", "password", ParameterType.GetOrPost);
+            request.AddParameter("username", "root", ParameterType.GetOrPost);
+            request.AddParameter("password", "1234", ParameterType.GetOrPost);
+            request.AddHeader("content-type", "application/x-www-form-urlencoded");
+            request.OnBeforeDeserialization = (resp) =>
+            {
+                resp.ContentType = "application/json";
+            };
+            var result = await client.ExecuteTaskAsync<BearerToken>(request);
+            if (result.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                logger.Info("Login Complete");
+            }
+            UpdateBearerToken(result);
         }
 
+        public async Task RefreshTokenAsync()
+        {   //this method will auto lock new request cannot request to server
+
+            logger.Info("Refresh Token To server");
+            var client = new RestClient(AppConfigurations.baseURL);
+            var request = new RestRequest("token", Method.POST);
+            request.AddParameter("grant_type", "refresh_token", ParameterType.GetOrPost);
+            request.AddParameter("refresh_token", this.tokenManager.bearerToken.refresh_token, ParameterType.GetOrPost);
+            request.AddHeader("content-type", "application/x-www-form-urlencoded");
+            request.OnBeforeDeserialization = (resp) =>
+            {
+                resp.ContentType = "application/json";
+            };
+            var result = await client.ExecuteTaskAsync<BearerToken>(request);
+            if (result.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                logger.Info("Refresh Token Complete");
+            }
+            UpdateBearerToken(result);
+        }
 
         private T LoginToServer<T>(Func<string, T> callback)
         {
@@ -101,7 +139,7 @@ namespace RestClientTest.Cls
             {
                 logger.Info("Login Complete");
             }
-            NotifyOtherRequest(result);
+            UpdateBearerToken(result);
             return callback(this.tokenManager.bearerToken.access_token);
         }
 
@@ -123,22 +161,22 @@ namespace RestClientTest.Cls
             {
                 logger.Info("Refresh Token Complete");
             }
-            NotifyOtherRequest(result);
+            UpdateBearerToken(result);
             return callback(this.tokenManager.bearerToken.access_token);
         }
 
-        public int DecreseRequest()
-        {
-            lock (lock_count)
-            {
-                request_count--;
-            }
-            return request_count;
-        }
+        //public int DecreseRequest()
+        //{
+        //    lock (lock_count)
+        //    {
+        //        request_count--;
+        //    }
+        //    return request_count;
+        //}
 
-        public int getRequestCount()
-        {
-            return request_count;
-        }
+        //public int getRequestCount()
+        //{
+        //    return request_count;
+        //}
     }
 }
