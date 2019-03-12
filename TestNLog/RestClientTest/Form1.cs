@@ -81,6 +81,8 @@ namespace RestClientTest
 
         private void ReportProgress(string obj)
         {
+            if (progressBar1.Value + 1 > progressBar1.Maximum)
+                return;
             progressBar1.Value++;
             counterLabel.Text = "" + progressBar1.Value;
         }
@@ -105,9 +107,7 @@ namespace RestClientTest
 
         private void button3_Click(object sender, EventArgs e)
         {
-            AsyncTestForm test = new AsyncTestForm(this);
-            this.Hide();
-            test.Show();
+
         }
     }
 }

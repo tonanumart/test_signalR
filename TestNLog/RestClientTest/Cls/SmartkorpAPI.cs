@@ -14,6 +14,10 @@ namespace RestClientTest.Cls
     {
         public static Logger logger = LogManager.GetLogger("log1");
 
+        public static SemaphoreSlim authOne = new SemaphoreSlim(1);
+
+        private static List<RestRequest> wait_auth = new List<RestRequest>();
+
         public Random x = new Random();
         readonly IRestClient _client;
 
@@ -61,10 +65,12 @@ namespace RestClientTest.Cls
             return result;
         }
 
-        public async Task<T> ExecuteAsync<T>(IRestRequest request) where T : new()
+        public async Task<T> ExecuteAsync<T>(IRestRequest request, bool isRefreshToken = false) where T : new()
         {
             request.SetPreRequest();
             var logComplete = GenReqId(request);
+            if (!isRefreshToken)
+                await ((CustomAuthenticator)_client.Authenticator).AuthenticateAsync(_client, request);
             var response = await _client.ExecuteTaskAsync<T>(request);
             logComplete(response.StatusCode.ToString());
             var result = await ResponseValidAsync<T>(response);
@@ -77,6 +83,7 @@ namespace RestClientTest.Cls
             {
                 request.SetPreRequest();
                 var logComplete = GenReqId(request);
+                await ((CustomAuthenticator)_client.Authenticator).AuthenticateAsync(_client, request);
                 var response = await _client.ExecuteTaskAsync<T>(request);
                 logComplete(response.StatusCode.ToString());
                 var result = await ResponseValidAsync<T>(response);
@@ -92,9 +99,7 @@ namespace RestClientTest.Cls
         }
         #endregion
 
-        private static SemaphoreSlim authOne = new SemaphoreSlim(1);
-
-        private static List<RestRequest> wait_auth = new List<RestRequest>();
+        public static bool isRefreshToken = false;
 
         #region Response
         private async Task<T> ResponseValidAsync<T>(IRestResponse<T> response) where T : new()
@@ -107,26 +112,31 @@ namespace RestClientTest.Cls
                 var waitCheck = await authOne.WaitAsync(0);
                 if (waitCheck)
                 {//only one make auth
+                    isRefreshToken = true;
                     logger.Info("only one make auth");
                     await myAuth.AuthenCheckAsync();
-                    var result = await this.ExecuteAsync<T>(newReq);
-                    //await Task.Delay(1000);
+                    await Task.Delay(1000);
                     authOne.Release();
+                    var result = await this.ExecuteAsync<T>(newReq, true);
+                    isRefreshToken = false;
                     return result;
                 }
                 else
-                { //wait until authorize send signal
-                    logger.Info("waiting .......");
-                    var canRequest = await authOne.WaitAsync(0);
-                    while (!canRequest)
-                    {
-                        canRequest = await authOne.WaitAsync(TimeSpan.FromMilliseconds(100));
-                    }
-                    authOne.Release();
-                    var result = await this.ExecuteAsync<T>(newReq);
+                { //wait until authorize send signal 
+                    return await WaitAuthComplete<T>(newReq);
                 }
             }
             return response.Data;
+        }
+
+        private async Task<T> WaitAuthComplete<T>(RestRequest newReq) where T : new()
+        {
+            logger.Info("waiting .......");
+            while (isRefreshToken)
+                await Task.Delay(100);
+
+            var result = await this.ExecuteAsync<T>(newReq);
+            return result;
         }
 
 

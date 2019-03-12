@@ -11,6 +11,7 @@ namespace RestClientTest.Cls
     public class CustomAuthenticator : IAuthenticator
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();
+        private static Logger log1 = LogManager.GetLogger("log1");
 
         private TokenManager tokenManager;
 
@@ -24,11 +25,16 @@ namespace RestClientTest.Cls
 
         public void Authenticate(IRestClient client, IRestRequest request)
         {
-            //lock (lock_count)
-            //{
-            //    request_count++;
-            //}
             AddHeader(request);
+        }
+
+        public async Task AuthenticateAsync(IRestClient client, IRestRequest request)
+        {
+            if (SmartkorpApi.isRefreshToken) {
+                log1.Info("request wating.....");
+            }
+            while (SmartkorpApi.isRefreshToken)
+                await Task.Delay(100);
         }
 
         private void AddHeader(IRestRequest request)
@@ -68,16 +74,16 @@ namespace RestClientTest.Cls
 
         public async Task AuthenCheckAsync()
         {
-            logger.Info("AuthenCheck"); 
+            logger.Info("AuthenCheck");
             if (NoTokenMustLogin())
             {
-                await LoginToServerAsync(); 
+                await LoginToServerAsync();
             }
             else
             {
                 await RefreshTokenAsync();
             }
-        } 
+        }
 
         private async Task LoginToServerAsync()
         {
