@@ -2,28 +2,34 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
+using System.Linq;
 using Microsoft.AspNet.SignalR.Hubs;
 using SignalRNLog.SignalR.Sample;
+using LinqToExcel;
+using System.IO;
 
 namespace Microsoft.AspNet.SignalR.StockTicker
 {
     public class StockTicker
     {
+        public static string filePath = @"D:\Projects\Research\test_signalR\TestNLog\SignalRNLog\Excel";
         // Singleton instance
         private readonly static Lazy<StockTicker> _instance = new Lazy<StockTicker>(
             () => new StockTicker(GlobalHost.ConnectionManager.GetHubContext<StockTickerHub>().Clients));
 
         private readonly object _marketStateLock = new object();
         private readonly object _updateStockPricesLock = new object();
+        private readonly object _addUserLock = new object();
 
-        private readonly ConcurrentDictionary<string, Stock> _stocks = new ConcurrentDictionary<string, Stock>();
+        //private readonly ConcurrentDictionary<string, Stock> _stocks = new ConcurrentDictionary<string, Stock>();
 
-        private readonly List<Example> _list = new List<Example>();
+        //private readonly List<Example> _list = new List<Example>();
+        private List<Transaction_UserOnline_Result> _list = new List<Transaction_UserOnline_Result>();
 
         // Stock can go up or down by a percentage of this factor on each change
-        private readonly double _rangePercent = 0.002;
+        //private readonly double _rangePercent = 0.002;
 
-        private readonly TimeSpan _updateInterval = TimeSpan.FromMilliseconds(5000);
+        private readonly TimeSpan _updateInterval = TimeSpan.FromMilliseconds(10000);
         private readonly Random _updateOrNotRandom = new Random();
 
         private Timer _timer;
@@ -31,6 +37,19 @@ namespace Microsoft.AspNet.SignalR.StockTicker
         private volatile MarketState _marketState;
 
         private int timeCount = 0;
+
+        //connection Id User
+        public readonly ConcurrentDictionary<int, string> users = new ConcurrentDictionary<int, string>();
+
+
+        public void addUser(string connectionId)
+        {
+            lock (_addUserLock)
+            {
+                var userId = users.Count;
+                users.TryAdd(userId, connectionId);
+            }
+        }
 
         private StockTicker(IHubConnectionContext<dynamic> clients)
         {
@@ -56,11 +75,6 @@ namespace Microsoft.AspNet.SignalR.StockTicker
         {
             get { return _marketState; }
             private set { _marketState = value; }
-        }
-
-        public IEnumerable<Stock> GetAllStocks()
-        {
-            return _stocks.Values;
         }
 
         public void OpenMarket()
@@ -112,60 +126,39 @@ namespace Microsoft.AspNet.SignalR.StockTicker
 
         private void LoadDefaultStocks()
         {
-            _stocks.Clear();
-
-            var stocks = new List<Stock>
-            {
-                new Stock { Symbol = "MSFT", Price = 41.68m },
-                new Stock { Symbol = "AAPL", Price = 92.08m },
-                new Stock { Symbol = "GOOG", Price = 543.01m }
+            var excel = new ExcelQueryFactory(Path.Combine(filePath, "Book1.xls"));
+            //var list = from c in excel.Worksheet<Transaction_UserOnline_Result>()
+            //           select c;
+            //_list = list.ToList();
+            var _int = new int[]{
+                362
+                ,16
+                ,362
+                ,107
+                ,18
+                ,362
+                ,20
+                ,18
+                ,19
+                ,56
+                ,362 
             };
-
-            stocks.ForEach(stock => _stocks.TryAdd(stock.Symbol, stock));
-           //_list.AddRange(MessageFactory.MockOver_4Kb());
-           MockXItems(6); 
-        }
-
-        private void MockXItems(int x)
-        {//27kb  size
-            for (int i = 0; i < x; i++)
+            for (int i = 0; i < 11; i++)
             {
-                _list.Add(new Example()
+                var topicId = 8000 + i;
+                for (int j = 0; j < _int[i]; j++)
                 {
-                    TopicName = "[โปรโมชั่น] แจ้งคู่มือและรายละเอียดการใช้คูปองส่วนลด 10 บาท วันที่ 22 ก.พ.-31 มี.ค. 62 เฉพาะ 6 สาขา",
-                    LandingURL = "http://localhost:44045/Client/Questionaire?transId=16374",
-                    UserToken = "bc143239-b2ef-4595-aadd-7c2630255da7",
-                    SenderName = "Anumart Chaichana",
-                    OSName = "Microsoft Windows 7 Professional",
-                    DeviceName = "connex-ton-a",
-                    DeviceId = "BFEBFBFF000206A76C29CE53",
-                    Index = 1,
-                    TransId = 16374,
-                    UserId = 25,
-                    ThemeId = 17,
-                    FontColor = "#009951",
-                    AlertTime = "30:00.0",
-                    AutoRedirect = 1,
-                    BGColor = "#39ad53",
-                    DetailColor = "#39ad53",
-                    CompanyId = 157,
-                    DeviceType = "D",
-                    FontNotificationColor = "#39ad53",
-                    DispSender = 0,
-                    DisplayPersent = 60,
-                    DisplayTime = "100",
-                    FCMFlag = true,
-                    FCMToken = null,
-                    IPAddress = "192.168.0.77",
-                    URLIcon = null,
-                    MessageType = 1,
-                    NewsLoop = 50,
-                    ReadFlag = true,
-                    RemoveRead = 0,
-                    ShowCloseBtn = 0,
-                    Speed = 100,
-                    TopRangeNotification = 1
-                });
+                    _list.Add(new Transaction_UserOnline_Result()
+                    {
+                        TransId = topicId,
+                        UserId = j,
+                        TopicName = "[โปรโมชั่น] แจ้งพิมพ์ป้ายราคา และติดสื่อ โปรโมชั่นเปิดสาขาใหม่ เดือน มี.ค. 62 เฉพาะสาขาชุมชนในชาก จำนวน 4 โปรโมชั่น (892 รายการ)",
+                        DeviceId = "BFEBFBFF000406E3C41D9F7D",
+                        DeviceName = "DESKTOP-LH8AVTL",
+                        CompanyId = 157,
+                        FCMToken = "dALfQeNSZ9E:APA91bEsyMWbnKGBu5Q80vD5yFmd8wzqPNbTLIIJSlAtfneAMn6gxxVMkBuRJmmMuQCVYqcBJNuHD6Lzch2wXnhm8tsI7yOeRZCj9zZb5_EKUluC5Wx8qANJrD543rzLKS2R8_UJJXef"
+                    });
+                }
             }
         }
 
@@ -177,39 +170,31 @@ namespace Microsoft.AspNet.SignalR.StockTicker
                 if (!_updatingStockPrices)
                 {
                     _updatingStockPrices = true;
-                     
-                    foreach (var stock in _stocks.Values)
-                    {
-                        if (TryUpdateStockPrice(stock))
-                        {
-                            BroadcastStockPrice(stock); 
-                        }
-                    }
-                    BroadcastNews();
+                    BroadcastTransUserOnline();
                     _updatingStockPrices = false;
                 }
             }
         }
 
-        private bool TryUpdateStockPrice(Stock stock)
-        {
-            // Randomly choose whether to udpate this stock or not
-            var r = _updateOrNotRandom.NextDouble();
-            if (r > 0.1)
-            {
-                return false;
-            }
+        //private bool TryUpdateStockPrice(Stock stock)
+        //{
+        //    // Randomly choose whether to udpate this stock or not
+        //    var r = _updateOrNotRandom.NextDouble();
+        //    if (r > 0.1)
+        //    {
+        //        return false;
+        //    }
 
-            // Update the stock price by a random factor of the range percent
-            var random = new Random((int)Math.Floor(stock.Price));
-            var percentChange = random.NextDouble() * _rangePercent;
-            var pos = random.NextDouble() > 0.51;
-            var change = Math.Round(stock.Price * (decimal)percentChange, 2);
-            change = pos ? change : -change;
+        //    // Update the stock price by a random factor of the range percent
+        //    var random = new Random((int)Math.Floor(stock.Price));
+        //    var percentChange = random.NextDouble() * _rangePercent;
+        //    var pos = random.NextDouble() > 0.51;
+        //    var change = Math.Round(stock.Price * (decimal)percentChange, 2);
+        //    change = pos ? change : -change;
 
-            stock.Price += change;
-            return true;
-        }
+        //    stock.Price += change;
+        //    return true;
+        //}
 
         private void BroadcastMarketStateChange(MarketState marketState)
         {
@@ -236,20 +221,36 @@ namespace Microsoft.AspNet.SignalR.StockTicker
             Clients.All.updateStockPrice(stock);
         }
 
-        private void BroadcastNews()
+        private void BroadcastTransUserOnline()
         {
             timeCount++;
-            Clients.All.testMessageCall(new
+            var groupByClient = _list.GroupBy(x => x.UserId).Select(x => new
             {
-                list = testMessage(),
-                count = timeCount
-            });
+                UserId = x.Key,
+                Items = x.ToList()
+            }).OrderByDescending(x => x.Items.Count).ToList();
+
+            int nextId = 0;
+            foreach (var client in groupByClient)
+            {
+                string clientId = string.Empty;
+                bool canGet = this.users.TryGetValue(nextId,out clientId);
+                if (!string.IsNullOrWhiteSpace(clientId))
+                {
+                    Clients.Client(clientId).testMessageCall(new
+                    {
+                        list = client.Items,
+                        count = timeCount
+                    });
+                } 
+                nextId++;
+            }
         }
 
-        private List<Example> testMessage()
-        {
-            return _list;
-        }
+        //private List<Example> testMessage()
+        //{
+        //    return _list;
+        //}
     }
 
     public enum MarketState

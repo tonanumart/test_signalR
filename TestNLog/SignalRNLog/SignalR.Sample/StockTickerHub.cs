@@ -26,7 +26,7 @@ namespace Microsoft.AspNet.SignalR.StockTicker
 
         public IEnumerable<Stock> GetAllStocks()
         {
-            return _stockTicker.GetAllStocks();
+            return new List<Stock>();//_stockTicker.GetAllStocks();
         }
 
         public string GetMarketState()
@@ -47,6 +47,13 @@ namespace Microsoft.AspNet.SignalR.StockTicker
         public void Reset()
         {
             _stockTicker.Reset();
+        }
+
+
+        public override System.Threading.Tasks.Task OnConnected()
+        {
+            _stockTicker.addUser(Context.ConnectionId);
+            return base.OnConnected();
         }
     }
 }

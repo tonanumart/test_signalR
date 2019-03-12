@@ -156,7 +156,7 @@ namespace ClientSimulate
 
             stockTickerHubProxy.On<ClientResult>("TestMessageCall", (result) =>
             {
-                var num = this.AdjustValue(1, "Call", id);
+                var num = this.AdjustValue(result.list.Count, "Call", id);
                 labelCall.LabelAssign(num + "");
                 //logTextBox.LabelAssign(logAutoLine("Client " + id + " Receive : " + result.list.Count));
             });
