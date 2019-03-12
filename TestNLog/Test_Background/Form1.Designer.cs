@@ -1,4 +1,4 @@
-﻿namespace Test_Background
+﻿namespace SemaphoreForm
 {
     partial class Form1
     {
@@ -38,7 +38,7 @@
             // test_timer
             // 
             this.test_timer.Interval = 1000;
-            this.test_timer.Tick += new System.EventHandler(this.test_timer_Tick);
+            //this.test_timer.Tick += new System.EventHandler(this.test_timer_Tick);
             // 
             // button1
             // 

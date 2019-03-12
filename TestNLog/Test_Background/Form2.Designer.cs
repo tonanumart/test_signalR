@@ -1,4 +1,4 @@
-﻿namespace Test_Background
+﻿namespace SemaphoreForm
 {
     partial class Form2
     {

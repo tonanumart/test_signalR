@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Test_Background
+namespace SemaphoreForm
 {
     public partial class Form1 : Form
     {

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Test_Background.Properties
+namespace SemaphoreForm.Properties
 {
 
 
