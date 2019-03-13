@@ -26,21 +26,17 @@ namespace SemaphoreForm
         private void button1_Click(object sender, EventArgs e)
         {
             click++;
-            Task.Run(() => SynAs_Async(click));
+            NewForm(click);
             label1.Text = click.ToString();
         }
 
-        private async Task SynAs_Async(int clicked)
+        private async void NewForm(int clicked)
         {
-            
             var frm = await CallingForm(clicked);
-            Invoke(new MethodInvoker(() =>
-            {
-                opened++;
-                TaskResolve(); 
-                frm.Show();
-            }));
-        }
+            opened++;
+            TaskResolve();
+            frm.Show();
+        } 
 
         private void TaskResolve()
         {
@@ -54,19 +50,11 @@ namespace SemaphoreForm
             frm.FormClosed += (mSender, arg) =>
             {
                 Console.WriteLine("{0} release lock", id);
-                mLock.Release();
+                mLock.Release(); 
             };
-
-            var canLock = await mLock.WaitAsync(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
-            while (!canLock)
-            {
-                Console.WriteLine("{0} waiting to lock", id);
-                canLock = await mLock.WaitAsync(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
-            }
-            //after cannot lock 
-            //mLock.WaitAsync is Long Process (Until form close);
-            if (canLock)
-                Console.WriteLine("{0} access lock {1}", id, canLock);
+            Console.WriteLine("{0} waiting to access lock", id);
+            await mLock.WaitAsync(); //mLock.WaitAsync is Long Process (Until form close);
+            Console.WriteLine("{0} access lock", id);
             return frm;
         }
     }
