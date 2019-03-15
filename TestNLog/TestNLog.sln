@@ -26,6 +26,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestJoin", "TestJoin\TestJo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SemaphoreForm", "Test_Background\SemaphoreForm.csproj", "{FBE32428-7BF9-4D62-8492-3A0561A4D347}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskAsync", "TaskAsync\TaskAsync.csproj", "{1B2743C8-5261-4355-89CF-F51359F9E856}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -68,6 +70,10 @@ Global
 		{FBE32428-7BF9-4D62-8492-3A0561A4D347}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FBE32428-7BF9-4D62-8492-3A0561A4D347}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FBE32428-7BF9-4D62-8492-3A0561A4D347}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B2743C8-5261-4355-89CF-F51359F9E856}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B2743C8-5261-4355-89CF-F51359F9E856}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B2743C8-5261-4355-89CF-F51359F9E856}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B2743C8-5261-4355-89CF-F51359F9E856}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
