@@ -82,7 +82,13 @@ namespace SignalRNLog.Providers
                 //you are authented!! and your identity are new token 
                 tmpRefreshTokens.Remove(refreshToken);
             }
-        } 
+            else
+            {
+                // try to change text response default
+                //{    "error": "invalid_grant" }
+                // context.Response = context.OwinContext.Response
+            }
+        }
 
         #region Not Implement
         public void Create(AuthenticationTokenCreateContext context)

@@ -7,11 +7,9 @@ namespace SignalRNLog.Models
 {
     public class AuthViewModel
     {
-
-        public string Name { get; set; }
-
-        public string AuthType { get; set; }
-
+        public object Times { get; set; }
+        public string Name { get; set; } 
+        public string AuthType { get; set; } 
         public bool IsAuth { get; set; }
     }
 }

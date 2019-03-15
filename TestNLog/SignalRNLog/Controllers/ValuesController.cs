@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Claims;
 using System.Threading;
 using System.Web.Http;
 
@@ -25,11 +26,13 @@ namespace SignalRNLog.Controllers
         public AuthViewModel Get(int id)
         {
             Thread.Sleep(rand.Next(10) * 1000);
+            var claimsIdentity = User.Identity as ClaimsIdentity;;
             return new AuthViewModel
             {
                 Name = User.Identity.Name,
                 AuthType = User.Identity.AuthenticationType,
-                IsAuth = User.Identity.IsAuthenticated
+                IsAuth = User.Identity.IsAuthenticated,
+                Times = claimsIdentity.FindFirst("claimTimes")
             };
         }
 

@@ -53,7 +53,7 @@ namespace SignalRNLog.Providers
 
             var identity = new ClaimsIdentity(context.Options.AuthenticationType);
             identity.AddClaim(new Claim(ClaimTypes.Name, context.UserName));
-            //identity.AddClaim(new Claim("sub", user.UserName));
+            identity.AddClaim(new Claim("claimTimes", "1"));
             identity.AddClaim(new Claim("role", "user"));
 
             //var ticket = new AuthenticationTicket(identity, AuthProp(user.UserName));
@@ -81,6 +81,32 @@ namespace SignalRNLog.Providers
             }
 
             return Task.FromResult<object>(null);
+        }
+
+        /// <summary>
+        /// 3.Refresh Token(only) 
+        /// verify your token (cross check same place eg.)
+        /// and update new cliam for next request
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public override async Task GrantRefreshToken(OAuthGrantRefreshTokenContext context)
+        {
+            //return base.GrantRefreshToken(context);
+            var identity = new ClaimsIdentity(context.Ticket.Identity);
+            var timeRefresh = identity.Claims.Where(x => x.Type == "claimTimes").FirstOrDefault();
+            if (timeRefresh == null)
+            {//never happen
+                identity.AddClaim(new Claim("claimTimes", "1"));
+            }
+            else
+            {
+                var updateTime = Int32.Parse(timeRefresh.Value) + 1;
+                identity.TryRemoveClaim(timeRefresh);
+                identity.AddClaim(new Claim("claimTimes", updateTime.ToString()));
+            }
+            var newTicket = new AuthenticationTicket(identity, context.Ticket.Properties);
+            context.Validated(newTicket);
         }
 
 
