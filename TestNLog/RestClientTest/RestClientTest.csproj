@@ -62,11 +62,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cls\AppConfigurations.cs" />
+    <Compile Include="Cls\Authen\AuthMode.cs" />
+    <Compile Include="Cls\Authen\ISmartkorpAuthRequest.cs" />
+    <Compile Include="Cls\Authen\SmartkorpAuthenForm.cs" />
     <Compile Include="Cls\BearerToken.cs" />
     <Compile Include="Cls\CustomAuthenticator.cs" />
     <Compile Include="Cls\Helper.cs" />
+    <Compile Include="Cls\Authen\ITokenManager.cs" />
     <Compile Include="Cls\Models\Result.cs" />
     <Compile Include="Cls\SmartkorpAPI.cs" />
+    <Compile Include="Cls\SmartkorpOAuth.cs" />
     <Compile Include="Cls\TokenManager.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>

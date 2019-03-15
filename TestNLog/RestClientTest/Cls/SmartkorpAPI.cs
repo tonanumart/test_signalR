@@ -1,4 +1,5 @@
 ﻿using NLog;
+using RestClientTest.Cls.Authen;
 using RestSharp;
 using System;
 using System.Collections.Generic;
@@ -10,19 +11,26 @@ using System.Windows.Forms;
 
 namespace RestClientTest.Cls
 {
-    public class SmartkorpApi
+    public class SmartkorpApi : ISmartkorpAuthRequest
     {
         public static Logger logger = LogManager.GetLogger("log1");
-
         public static SemaphoreSlim authOne = new SemaphoreSlim(1);
-
-        private static List<RestRequest> wait_auth = new List<RestRequest>();
-
-        public Random x = new Random();
-        readonly IRestClient _client;
-
-
+        private static readonly List<RestRequest> wait_auth = new List<RestRequest>();
         private static readonly Lazy<SmartkorpApi> _instance = new Lazy<SmartkorpApi>(() => new SmartkorpApi());
+
+
+        public Random gen = new Random();
+        private readonly IRestClient _client;
+        private readonly ISmartkorpAuthRequest _authRequest;
+        private readonly ITokenManager _tokenManager;
+
+        private readonly SmartkorpOAuth _smk_oauth;
+
+
+
+        public static bool isRefreshToken = false;
+
+
         public static SmartkorpApi Instance
         {
             get { return _instance.Value; }
@@ -30,7 +38,20 @@ namespace RestClientTest.Cls
         private SmartkorpApi()
         {
             var client = new RestClient(AppConfigurations.baseAPIURL);
-            client.Authenticator = new CustomAuthenticator(new TokenManager());
+            _tokenManager = new TokenManager();
+            client.Authenticator = new CustomAuthenticator(_tokenManager);
+            _authRequest = this;
+            _smk_oauth = new SmartkorpOAuth(_authRequest);
+            _client = client;
+        }
+
+        private SmartkorpApi(ITokenManager tokenManager, ISmartkorpAuthRequest authRequest)
+        {
+            var client = new RestClient(AppConfigurations.baseAPIURL);
+            _tokenManager = tokenManager;
+            client.Authenticator = new CustomAuthenticator(_tokenManager);
+            _authRequest = authRequest;
+            _smk_oauth = new SmartkorpOAuth(authRequest);
             _client = client;
         }
 
@@ -99,7 +120,7 @@ namespace RestClientTest.Cls
         }
         #endregion
 
-        public static bool isRefreshToken = false;
+
 
         #region Response
         private async Task<T> ResponseValidAsync<T>(IRestResponse<T> response) where T : new()
@@ -114,7 +135,8 @@ namespace RestClientTest.Cls
                 {//only one make auth
                     isRefreshToken = true;
                     logger.Info("only one make auth");
-                    await myAuth.AuthenCheckAsync();
+                    var newToken = await _smk_oauth.Auto_AuthenAsync();
+                    _tokenManager.NotifyChangeToken(newToken);
                     await Task.Delay(1000);
                     authOne.Release();
                     var result = await this.ExecuteAsync<T>(newReq, true);
@@ -148,10 +170,9 @@ namespace RestClientTest.Cls
             {
                 logger.Info("{0} {1}", response.StatusCode.ToString(), response.Content);
                 var newReq = CopyRequest<T>(response);
-                return myAuth.AuthenCheck<T>((newToken) =>
-                {
-                    return this.Execute<T>(newReq);
-                });
+                var token = _smk_oauth.Auto_Authen();
+                _tokenManager.NotifyChangeToken(token);
+                return this.Execute<T>(newReq); ;
             }
             int numericStatusCode = (int)response.StatusCode;
             if (numericStatusCode > 200 && numericStatusCode < 301)
@@ -172,6 +193,29 @@ namespace RestClientTest.Cls
 
         #endregion
 
+
+        public AuthMode getModeAuthen()
+        {
+            if (string.IsNullOrWhiteSpace(_tokenManager.Access_token))
+            {
+                return AuthMode.PASSWORD;
+            }
+            return AuthMode.REFRESHTOKEN;
+        }
+
+        public string GetRefreshToken()
+        {
+            return _tokenManager.Refresh_token;
+        }
+
+        public SmartkorpAuthenForm GetUserNamePassword()
+        {
+            return new SmartkorpAuthenForm()
+            {
+                UserName = "root",
+                Password = "1234"
+            };
+        }
     }
 
 

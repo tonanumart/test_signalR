@@ -60,7 +60,7 @@ namespace RestClientTest
                 asyncTextLabel.Text = NumString(i);
                 var mRequest = TestConnection();
                 SmartkorpApi.Instance.Execute<List<string>>(mRequest);
-                progressBar1.Value++;
+                ReportProgress(string.Empty);
             }
             logger.Info("All Requests Complete");
         }

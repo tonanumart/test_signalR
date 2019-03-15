@@ -1,4 +1,5 @@
 ﻿using NLog;
+using RestClientTest.Cls.Authen;
 using RestSharp;
 using System;
 using System.Collections.Generic;
@@ -13,14 +14,11 @@ namespace RestClientTest.Cls
         private static Logger logger = LogManager.GetCurrentClassLogger();
         private static Logger log1 = LogManager.GetLogger("log1");
 
-        private TokenManager tokenManager;
+        private ITokenManager _tokenManager; 
 
-        //private static int request_count = 0;
-        //private static object lock_count = new object();
-
-        public CustomAuthenticator(TokenManager tokenManager)
+        public CustomAuthenticator(ITokenManager tokenManager)
         {
-            this.tokenManager = tokenManager;
+            _tokenManager = tokenManager;
         }
 
         public void Authenticate(IRestClient client, IRestRequest request)
@@ -30,7 +28,8 @@ namespace RestClientTest.Cls
 
         public async Task AuthenticateAsync(IRestClient client, IRestRequest request)
         {
-            if (SmartkorpApi.isRefreshToken) {
+            if (SmartkorpApi.isRefreshToken)
+            {
                 log1.Info("request wating.....");
             }
             while (SmartkorpApi.isRefreshToken)
@@ -39,150 +38,10 @@ namespace RestClientTest.Cls
 
         private void AddHeader(IRestRequest request)
         {
-            if (!string.IsNullOrWhiteSpace(tokenManager.bearerToken.access_token))
-                logger.Debug("Add Bearer {0}", tokenManager.bearerToken.access_token.Substring(0, 10));
-            request.AddHeader("Authorization", string.Format("{0} {1}", tokenManager.bearerToken.token_type, tokenManager.bearerToken.access_token));
-            //logger.Debug("End Authenticate Request");
+            var accessToken = _tokenManager.Access_token;
+            if (!string.IsNullOrWhiteSpace(accessToken))
+                logger.Debug("Add Bearer {0}", accessToken.Substring(0, 10));
+            request.AddHeader("Authorization", string.Format("{0} {1}", _tokenManager.Token_type, _tokenManager.Access_token));
         }
-
-
-        private void UpdateBearerToken(IRestResponse<BearerToken> result)
-        {
-            this.tokenManager.bearerToken = result.Data;
-        }
-
-        private bool NoTokenMustLogin()
-        {
-            return string.IsNullOrWhiteSpace(this.tokenManager.bearerToken.access_token);
-        }
-
-        public T AuthenCheck<T>(Func<string, T> callback)
-        {
-            logger.Debug("AuthenCheck");
-
-            if (NoTokenMustLogin())
-            {
-                var result = LoginToServer<T>(callback);
-                return result;
-            }
-            else
-            {
-                var result = RefreshToken<T>(callback);
-                return result;
-            }
-        }
-
-        public async Task AuthenCheckAsync()
-        {
-            logger.Info("AuthenCheck");
-            if (NoTokenMustLogin())
-            {
-                await LoginToServerAsync();
-            }
-            else
-            {
-                await RefreshTokenAsync();
-            }
-        }
-
-        private async Task LoginToServerAsync()
-        {
-            logger.Info("Login To server");
-            var client = new RestClient(AppConfigurations.baseURL);
-            var request = new RestRequest("token", Method.POST);
-            request.AddParameter("grant_type", "password", ParameterType.GetOrPost);
-            request.AddParameter("username", "root", ParameterType.GetOrPost);
-            request.AddParameter("password", "1234", ParameterType.GetOrPost);
-            request.AddHeader("content-type", "application/x-www-form-urlencoded");
-            request.OnBeforeDeserialization = (resp) =>
-            {
-                resp.ContentType = "application/json";
-            };
-            var result = await client.ExecuteTaskAsync<BearerToken>(request);
-            if (result.StatusCode == System.Net.HttpStatusCode.OK)
-            {
-                logger.Info("Login Complete");
-            }
-            UpdateBearerToken(result);
-        }
-
-        public async Task RefreshTokenAsync()
-        {   //this method will auto lock new request cannot request to server
-
-            logger.Info("Refresh Token To server");
-            var client = new RestClient(AppConfigurations.baseURL);
-            var request = new RestRequest("token", Method.POST);
-            request.AddParameter("grant_type", "refresh_token", ParameterType.GetOrPost);
-            request.AddParameter("refresh_token", this.tokenManager.bearerToken.refresh_token, ParameterType.GetOrPost);
-            request.AddHeader("content-type", "application/x-www-form-urlencoded");
-            request.OnBeforeDeserialization = (resp) =>
-            {
-                resp.ContentType = "application/json";
-            };
-            var result = await client.ExecuteTaskAsync<BearerToken>(request);
-            if (result.StatusCode == System.Net.HttpStatusCode.OK)
-            {
-                logger.Info("Refresh Token Complete");
-            }
-            UpdateBearerToken(result);
-        }
-
-        private T LoginToServer<T>(Func<string, T> callback)
-        {
-            logger.Info("Login To server");
-            var client = new RestClient(AppConfigurations.baseURL);
-            var request = new RestRequest("token", Method.POST);
-            request.AddParameter("grant_type", "password", ParameterType.GetOrPost);
-            request.AddParameter("username", "root", ParameterType.GetOrPost);
-            request.AddParameter("password", "1234", ParameterType.GetOrPost);
-            request.AddHeader("content-type", "application/x-www-form-urlencoded");
-            request.OnBeforeDeserialization = (resp) =>
-            {
-                resp.ContentType = "application/json";
-            };
-            var result = client.Execute<BearerToken>(request);
-            if (result.StatusCode == System.Net.HttpStatusCode.OK)
-            {
-                logger.Info("Login Complete");
-            }
-            UpdateBearerToken(result);
-            return callback(this.tokenManager.bearerToken.access_token);
-        }
-
-        public T RefreshToken<T>(Func<string, T> callback)
-        {   //this method will auto lock new request cannot request to server
-
-            logger.Info("Refresh Token To server");
-            var client = new RestClient(AppConfigurations.baseURL);
-            var request = new RestRequest("token", Method.POST);
-            request.AddParameter("grant_type", "refresh_token", ParameterType.GetOrPost);
-            request.AddParameter("refresh_token", this.tokenManager.bearerToken.refresh_token, ParameterType.GetOrPost);
-            request.AddHeader("content-type", "application/x-www-form-urlencoded");
-            request.OnBeforeDeserialization = (resp) =>
-            {
-                resp.ContentType = "application/json";
-            };
-            var result = client.Execute<BearerToken>(request);
-            if (result.StatusCode == System.Net.HttpStatusCode.OK)
-            {
-                logger.Info("Refresh Token Complete");
-            }
-            UpdateBearerToken(result);
-            return callback(this.tokenManager.bearerToken.access_token);
-        }
-
-        //public int DecreseRequest()
-        //{
-        //    lock (lock_count)
-        //    {
-        //        request_count--;
-        //    }
-        //    return request_count;
-        //}
-
-        //public int getRequestCount()
-        //{
-        //    return request_count;
-        //}
     }
 }
